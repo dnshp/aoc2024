@@ -30,12 +30,28 @@ fn evaluate_report(report: &Vec<i64>) -> Result<u64, Box<dyn Error>> {
     Ok(1)
 }
 
+fn evaluate_with_dampener(report: &Vec<i64>) -> Result<u64, Box<dyn Error>> {
+    if evaluate_report(report)? == 1 {
+        return Ok(1);
+    }
+
+    for i in 0..report.len() {
+        let mut dampened = report.clone();
+        dampened.remove(i);
+        if evaluate_report(&dampened)? == 1 {
+            return Ok(1);
+        }
+    }
+
+    Ok(0)
+}
+
 fn main() {
     let reports = parse_reports("dat/input.txt").unwrap();
-    // let safe: Vec<u64> = reports.into_iter().map(|x| evaluate_report(&x).unwrap()).collect();
-    // for i in 35..40 {
-    //     println!("{} {}", i, safe[i]);
-    // }
     let safe: u64 = reports.into_iter().map(|x| evaluate_report(&x).unwrap()).sum();
     println!("{} safe reports.", safe);
+
+    let reports = parse_reports("dat/input.txt").unwrap();
+    let safe: u64 = reports.into_iter().map(|x| evaluate_with_dampener(&x).unwrap()).sum();
+    println!("{} safe reports with dampener.", safe);
 }
