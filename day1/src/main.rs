@@ -2,6 +2,7 @@ use std::fs;
 use std::error::Error;
 use std::num::ParseIntError;
 use std::iter::zip;
+use std::collections::HashMap;
 
 fn parse_line_to_pair(line: &str) -> Result<(i64, i64), Box<dyn Error>> {
     let pair: Vec<&str> = line.split(" ").filter(|e| e.len() > 0).collect();
@@ -29,6 +30,15 @@ fn parse_file(name: &str) -> Result<Vec<Vec<i64>>, Box<dyn Error>> {
     Ok(lists)
 }
 
+fn vec_to_histogram(vec: &Vec<i64>) -> HashMap<i64, i64> {
+    let mut hist = HashMap::new();
+    for val in vec {
+        hist.entry(val.clone()).and_modify(|e| *e += 1).or_insert(1);
+    }
+
+    hist
+}
+
 fn main() {
     let mut lists = parse_file("dat/input.txt").unwrap();
     lists[0].sort();
@@ -38,5 +48,14 @@ fn main() {
     for pair in pairs {
         diff += (pair.0 - pair.1).abs();
     }
-    println!("{}", diff)
+    println!("Sorted diff: {}", diff);
+
+    // part 2
+    let mut right_hist = vec_to_histogram(&lists[1]);
+    let mut agg: i64 = 0;
+    for val in &lists[0] {
+        let num_occurrences = *right_hist.entry(*val).or_insert(0);
+        agg += val * num_occurrences;
+    }
+    println!("Similarity score: {}", agg);
 }
