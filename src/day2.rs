@@ -46,12 +46,12 @@ fn evaluate_with_dampener(report: &Vec<i64>) -> Result<u64, Box<dyn Error>> {
     Ok(0)
 }
 
-fn main() {
-    let reports = parse_reports("dat/input.txt").unwrap();
+pub fn main(file: &str) {
+    let reports = parse_reports(file).unwrap();
     let safe: u64 = reports.into_iter().map(|x| evaluate_report(&x).unwrap()).sum();
     println!("{} safe reports.", safe);
 
-    let reports = parse_reports("dat/input.txt").unwrap();
+    let reports = parse_reports(file).unwrap();
     let safe: u64 = reports.into_iter().map(|x| evaluate_with_dampener(&x).unwrap()).sum();
     println!("{} safe reports with dampener.", safe);
 }

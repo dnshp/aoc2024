@@ -39,8 +39,8 @@ fn vec_to_histogram(vec: &Vec<i64>) -> HashMap<i64, i64> {
     hist
 }
 
-fn main() {
-    let mut lists = parse_file("dat/input.txt").unwrap();
+pub fn main(file: &str) {
+    let mut lists = parse_file(file).unwrap();
     lists[0].sort();
     lists[1].sort();
     let pairs = zip(&lists[0], &lists[1]);

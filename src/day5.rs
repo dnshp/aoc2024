@@ -39,8 +39,8 @@ fn check_rule_for_sequence(r: &Rule, s: &Sequence) -> bool {
     first.unwrap() < second.unwrap()
 }
 
-fn main() {
-    let (rules, sequences) = parse("dat/input.txt").unwrap();
+pub fn main(file: &str) {
+    let (rules, sequences) = parse(file).unwrap();
 
     // part 1
     let mut total = 0;

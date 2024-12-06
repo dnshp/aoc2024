@@ -45,10 +45,8 @@ fn get_valid_segments(text: &str) -> Result<Vec<&str>, Box<dyn Error>> {
     Ok(valid_segments)
 }
 
-fn main() {
-    let filename = "dat/input.txt";
-
-    let text: &str = &fs::read_to_string(filename).unwrap()[..];
+pub fn main(file: &str) {
+    let text: &str = &fs::read_to_string(file).unwrap()[..];
     // let text_segments: Vec<&str> = vec![text]; /* Part 1 */
     let text_segments = get_valid_segments(text).unwrap(); /* Part 2 */
 

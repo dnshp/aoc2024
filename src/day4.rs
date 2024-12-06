@@ -112,10 +112,8 @@ fn find_patterns2(lines: &Vec<Vec<u8>>) -> Result<usize, Box<dyn Error>> {
     Ok(count)
 }
 
-fn main() {
-    let filename = "dat/input.txt";
-
-    let text: String = fs::read_to_string(filename).unwrap();
+pub fn main(file: &str) {
+    let text: String = fs::read_to_string(file).unwrap();
     let lines: Vec<Vec<u8>> = text.split("\n").filter(|e| e.len() > 0).map(|v| Vec::from(v)).collect();
     for line in &lines {
         assert_eq!(lines[0].len(), line.len());
