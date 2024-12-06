@@ -39,6 +39,8 @@ fn is_sorted_by_rules(a: &u32, b: &u32, rules: &Vec<Rule>) -> bool {
             return false;
         }
     }
+    // I should handle this more gracefully if this were production code, but for Advent, set the
+    // world ablaze.
     panic!("Values {} and {} did not have a corresponding sort rule!", a, b);
 }
 
@@ -53,6 +55,7 @@ pub fn main(file: &str) {
     let (rules, sequences) = parse(file).unwrap();
 
     let mut answers = vec![0, 0];
+    // we're only making one pass through, so sorting in place is OK.
     for mut sequence in sequences {
         let order_correct: bool = sequence.is_sorted_by(|a, b| is_sorted_by_rules(a, b, &rules));
         if order_correct {
