@@ -1,5 +1,6 @@
 use std::fs;
 use std::error::Error;
+use std::cmp::Ordering;
 
 type Rule = (u32, u32);
 type Sequence = Vec<u32>;
@@ -50,18 +51,28 @@ fn is_sorted_by_rules(a: &u32, b: &u32, rules: &Vec<Rule>) -> bool {
     panic!("Values {} and {} did not have a corresponding sort rule!", a, b);
 }
 
+fn compare_by_rules(a: &u32, b: &u32, rules: &Vec<Rule>) -> Ordering {
+    match is_sorted_by_rules(a, b, rules) {
+        true => Ordering::Less,
+        false => Ordering::Greater
+    }
+}
+
 pub fn main(file: &str) {
     let (rules, sequences) = parse(file).unwrap();
 
-    // part 1
-    let mut total = 0;
-    for sequence in sequences {
-        // let order_correct: bool = rules.iter().map(|r| check_rule_for_sequence(r, &sequence)).all(|b| b);
+    let mut answers = vec![0, 0];
+    for mut sequence in sequences {
         let order_correct: bool = sequence.is_sorted_by(|a, b| is_sorted_by_rules(a, b, &rules));
         if order_correct {
             assert_eq!(sequence.len() % 2, 1);
-            total += sequence[(sequence.len() - 1) / 2];
+            // inc part 1 answer
+            answers[0] += sequence[(sequence.len() - 1) / 2];
+        } else {
+            sequence.sort_by(|a, b| compare_by_rules(a, b, &rules));
+            answers[1] += sequence[(sequence.len() - 1) / 2];
         }
     }
-    println!("{}", total);
+    println!("Part 1: {}", answers[0]);
+    println!("Part 2: {}", answers[1]);
 }
