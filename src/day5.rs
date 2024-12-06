@@ -31,15 +31,6 @@ fn parse(filename: &str) -> Result<(Vec<Rule>, Vec<Sequence>), Box<dyn Error>> {
     Ok((rules, sequences))
 }
 
-// fn check_rule_for_sequence(r: &Rule, s: &Sequence) -> bool {
-//     let first = s.iter().position(|x| *x == r.0);
-//     let second = s.iter().position(|x| *x == r.1);
-//     if first.is_none() || second.is_none() {
-//         return true;
-//     }
-//     first.unwrap() < second.unwrap()
-// }
-
 fn is_sorted_by_rules(a: &u32, b: &u32, rules: &Vec<Rule>) -> bool {
     for r in rules {
         if r.0 == *a && r.1 == *b {
