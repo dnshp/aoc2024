@@ -30,13 +30,24 @@ fn parse(filename: &str) -> Result<(Vec<Rule>, Vec<Sequence>), Box<dyn Error>> {
     Ok((rules, sequences))
 }
 
-fn check_rule_for_sequence(r: &Rule, s: &Sequence) -> bool {
-    let first = s.iter().position(|x| *x == r.0);
-    let second = s.iter().position(|x| *x == r.1);
-    if first.is_none() || second.is_none() {
-        return true;
+// fn check_rule_for_sequence(r: &Rule, s: &Sequence) -> bool {
+//     let first = s.iter().position(|x| *x == r.0);
+//     let second = s.iter().position(|x| *x == r.1);
+//     if first.is_none() || second.is_none() {
+//         return true;
+//     }
+//     first.unwrap() < second.unwrap()
+// }
+
+fn is_sorted_by_rules(a: &u32, b: &u32, rules: &Vec<Rule>) -> bool {
+    for r in rules {
+        if r.0 == *a && r.1 == *b {
+            return true;
+        } else if r.0 == *b && r.1 == *a {
+            return false;
+        }
     }
-    first.unwrap() < second.unwrap()
+    panic!("Values {} and {} did not have a corresponding sort rule!", a, b);
 }
 
 pub fn main(file: &str) {
@@ -45,7 +56,8 @@ pub fn main(file: &str) {
     // part 1
     let mut total = 0;
     for sequence in sequences {
-        let order_correct: bool = rules.iter().map(|r| check_rule_for_sequence(r, &sequence)).all(|b| b);
+        // let order_correct: bool = rules.iter().map(|r| check_rule_for_sequence(r, &sequence)).all(|b| b);
+        let order_correct: bool = sequence.is_sorted_by(|a, b| is_sorted_by_rules(a, b, &rules));
         if order_correct {
             assert_eq!(sequence.len() % 2, 1);
             total += sequence[(sequence.len() - 1) / 2];
