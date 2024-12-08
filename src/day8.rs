@@ -29,15 +29,11 @@ fn parse(file: &str) -> Result<(HashMap<char, Vec<(i32, i32)>>, (i32, i32)), Box
 
 fn get_antinodes(a: &(i32, i32), b: &(i32, i32), dimensions: (i32, i32)) -> HashSet<(i32, i32)> {
     let mut antinodes: HashSet<(i32, i32)> = HashSet::new();
+    let xrange = 0..dimensions.0;
+    let yrange = 0..dimensions.1;
     let xdiff = b.0 - a.0;
     let ydiff = b.1 - a.1;
-    // the "inside" antinodes, ie. those between the two antennas, only exist if the distance
-    // between them in x and y is divisible by 3. they will be at 1/3 and 2/3 of the line
-    // connecting the antennas.
-    if xdiff % 3 == 0 && ydiff % 3 == 0 {
-        antinodes.insert((a.0 + (xdiff / 3), a.1 + (ydiff / 3)));
-        antinodes.insert((b.0 - (xdiff / 3), b.1 - (ydiff / 3)));
-    }
+
     // the "outside" antinodes, ie. those collinear with the antennas but not between them, exist
     // as long as their locations would be within the dimensions of the space.
     let outside_antinodes = vec![
@@ -45,9 +41,39 @@ fn get_antinodes(a: &(i32, i32), b: &(i32, i32), dimensions: (i32, i32)) -> Hash
         (b.0 + xdiff, b.1 + ydiff)
     ];
     for candidate in outside_antinodes {
-        if candidate.0 >= 0 && candidate.0 < dimensions.0 && candidate.1 >= 0 && candidate.1 < dimensions.1 {
+        if xrange.contains(&candidate.0) && yrange.contains(&candidate.1) {
             antinodes.insert(candidate);
         }
+    }
+
+    antinodes
+}
+
+fn get_antinodes_2(a: &(i32, i32), b: &(i32, i32), dimensions: (i32, i32)) -> HashSet<(i32, i32)> {
+    let mut antinodes: HashSet<(i32, i32)> = HashSet::new();
+    // trivially, each antenna is an antinode.
+    antinodes.insert(a.clone());
+    antinodes.insert(b.clone());
+
+    let xrange = 0..dimensions.0;
+    let yrange = 0..dimensions.1;
+    let xdiff = b.0 - a.0;
+    let ydiff = b.1 - a.1;
+    
+    // scan "forward"
+    let mut candidate = vec![a.0 - xdiff, a.1 - ydiff];
+    while xrange.contains(&candidate[0]) && yrange.contains(&candidate[1]) {
+        antinodes.insert((candidate[0], candidate[1]));
+        candidate[0] -= xdiff;
+        candidate[1] -= ydiff;
+    }
+
+    // scan "backward"
+    let mut candidate = vec![b.0 + xdiff, b.1 + ydiff];
+    while xrange.contains(&candidate[0]) && yrange.contains(&candidate[1]) {
+        antinodes.insert((candidate[0], candidate[1]));
+        candidate[0] += xdiff;
+        candidate[1] += ydiff;
     }
 
     antinodes
@@ -56,14 +82,16 @@ fn get_antinodes(a: &(i32, i32), b: &(i32, i32), dimensions: (i32, i32)) -> Hash
 pub fn main(file: &str) {
     let (locs, dims) = parse(file).unwrap();
     // for each frequency, consider every possible combination of points.
-    let mut antinodes: HashSet<(i32, i32)> = HashSet::new();
+    let mut antinodes: Vec<HashSet<(i32, i32)>> = vec![HashSet::new(), HashSet::new()];
     for (_, antennas) in locs.iter() {
         let antenna_pairs = antennas.iter().combinations(2);
         for pair in antenna_pairs {
             assert_eq!(pair.len(), 2);
-            antinodes.extend(get_antinodes(pair[0], pair[1], dims));
+            antinodes[0].extend(get_antinodes(pair[0], pair[1], dims));
+            antinodes[1].extend(get_antinodes_2(pair[0], pair[1], dims));
         }
     }
 
-    println!("Part 1: {} antinodes", antinodes.len());
+    println!("Part 1: {} antinodes", antinodes[0].len());
+    println!("Part 2: {} antinodes", antinodes[1].len());
 }
