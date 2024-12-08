@@ -1,11 +1,10 @@
 use std::fs;
-use combinatorial::CombinationsWithReplacement;
 use std::error::Error;
 use itertools::Itertools;
 
 fn test_operator_combinations(expected_total: u64, operands: &[u64], operators: &[&str]) -> Result<bool, Box<dyn Error>> {
     let num_operators = operands.len() - 1;
-    let operator_combinations = (0..num_operators).map(|i| operators).multi_cartesian_product();
+    let operator_combinations = (0..num_operators).map(|_| operators).multi_cartesian_product();
 
     for combo in operator_combinations {
         let mut rolling_val = operands[0];
