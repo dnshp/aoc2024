@@ -6,6 +6,7 @@ pub mod day5;
 pub mod day6;
 pub mod day7;
 pub mod day8;
+pub mod day9;
 
 use std::env;
 
@@ -24,6 +25,7 @@ fn main() {
         "6" => day6::main(file),
         "7" => day7::main(file),
         "8" => day8::main(file),
+        "9" => day9::main(file),
         _ => panic!("invalid day {}", day),
     }
 }
