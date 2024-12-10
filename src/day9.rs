@@ -1,5 +1,12 @@
 use std::fs;
 use std::collections::HashSet;
+use std::ops::Range;
+
+#[derive(Clone, Debug)]
+struct Segment {
+    val: Option<usize>,
+    size: usize
+}
 
 fn defrag_1(mut raw: Vec<usize>) -> usize {
     let fs_size: usize = raw.clone().into_iter().step_by(2).sum();
@@ -13,7 +20,6 @@ fn defrag_1(mut raw: Vec<usize>) -> usize {
     let mut f_file = 0;
     let mut b_file = (raw.len() - 1) / 2;
     while f_idx <= b_idx {
-        println!("{} {}", f_idx, b_idx);
         // sanity check
         assert_eq!(f_idx % 2, 0);
         assert_eq!(b_idx % 2, 0);
@@ -47,12 +53,79 @@ fn defrag_1(mut raw: Vec<usize>) -> usize {
     checksum
 }
 
-fn defrag_2(mut raw: Vec<usize>) -> usize {
-    let fs_size: usize = raw.clone().iter().sum();
-    let mut fs_repr: Vec<usize> = Vec::new();
-    fs_repr.reserve_exact(fs_size);
+fn defrag_2(raw: Vec<usize>) -> usize {
+    assert_eq!(raw.len() % 2, 1);
+    let last_fid = (raw.len() - 1) / 2;
+    // compressed filesystem representation
+    let mut fs: Vec<Segment> = Vec::new();
 
-    // aaaa
+    for (i, ss) in raw.iter().enumerate() {
+        if i % 2 == 0 {
+            fs.push(Segment{val: Some(i / 2), size: *ss});
+        } else {
+            fs.push(Segment{val: None, size: *ss});
+        }
+    }
+
+    for fid in (0..=last_fid).rev() {
+        for i in 0..fs.len() {
+            if fs[i].val == Some(fid) {
+                let file = fs[i].clone();
+                for j in 0..i {
+                    let gap = &fs[j];
+                    match gap.val {
+                        Some(v) => {
+                            if v == file.val.unwrap() {
+                                break;
+                            }
+                        },
+                        None => {
+                            if gap.size >= file.size {
+                                let diff = gap.size - file.size;
+                                // replace in earlier location. Note that i > j always.
+                                fs.remove(j);
+                                fs.insert(j, file);
+                                if diff > 0 {
+                                    fs.insert(j + 1, Segment{val: None, size: diff});
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // then clean out the back
+    let mut seen: HashSet<usize> = HashSet::new();
+    let mut idx = 0;
+    while idx < fs.len() {
+        let mut f = &mut fs[idx];
+        match f.val {
+            Some(v) => {
+                if seen.contains(&v) {
+                    f.val = None;
+                } else {
+                    seen.insert(v);
+                    idx += 1;
+                }
+            },
+            None => {idx += 1;}
+        };
+    }
+
+    let mut fs_repr: Vec<usize> = Vec::new();
+    fs_repr.reserve_exact(raw.iter().sum());
+
+    for f in fs {
+        for s in 0..f.size {
+            match f.val {
+                Some(v) => fs_repr.push(v),
+                None => fs_repr.push(0)
+            };
+        }
+    }
 
     let checksum: usize = fs_repr.iter().enumerate().map(|(i, f)| i * f).sum();
     checksum
