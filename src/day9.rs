@@ -1,6 +1,5 @@
 use std::fs;
 use std::collections::HashSet;
-use std::ops::Range;
 
 #[derive(Clone, Debug)]
 struct Segment {
@@ -101,7 +100,7 @@ fn defrag_2(raw: Vec<usize>) -> usize {
     let mut seen: HashSet<usize> = HashSet::new();
     let mut idx = 0;
     while idx < fs.len() {
-        let mut f = &mut fs[idx];
+        let f = &mut fs[idx];
         match f.val {
             Some(v) => {
                 if seen.contains(&v) {
@@ -119,7 +118,7 @@ fn defrag_2(raw: Vec<usize>) -> usize {
     fs_repr.reserve_exact(raw.iter().sum());
 
     for f in fs {
-        for s in 0..f.size {
+        for _s in 0..f.size {
             match f.val {
                 Some(v) => fs_repr.push(v),
                 None => fs_repr.push(0)
