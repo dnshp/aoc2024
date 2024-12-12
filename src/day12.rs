@@ -1,12 +1,18 @@
 use std::fs;
 use std::collections::HashSet;
 
-fn search(row: usize, col: usize, grid: &Vec<Vec<char>>, in_region: &mut Vec<Vec<bool>>, fences: &mut Vec<Vec<usize>>) -> HashSet<(usize, usize)> {
+struct Plot {
+    plant: char,
+    in_region: bool,
+    fences: usize
+}
+
+fn search(row: usize, col: usize, grid: &mut Vec<Vec<Plot>>) -> HashSet<(usize, usize)> {
     let mut region: HashSet<(usize, usize)> = HashSet::new();
-    if in_region[row][col] {
+    if grid[row][col].in_region {
         return region;
     }
-    in_region[row][col] = true;
+    grid[row][col].in_region = true;
     region.insert((row, col));
 
     let mut neighbors: Vec<(usize, usize)> = Vec::new();
@@ -26,41 +32,27 @@ fn search(row: usize, col: usize, grid: &Vec<Vec<char>>, in_region: &mut Vec<Vec
 
     let mut fence_sides = 4 - neighbors.len();
     for n in neighbors {
-        if grid[n.0][n.1] == grid[row][col] {
-            region.extend(search(n.0, n.1, grid, in_region, fences));
+        if grid[n.0][n.1].plant == grid[row][col].plant {
+            region.extend(search(n.0, n.1, grid));
         }
         else {
             fence_sides += 1;
         }
     }
 
-    fences[row][col] = fence_sides;
+    grid[row][col].fences = fence_sides;
 
     region
 }
 
 pub fn main(file: &str) {
-    let grid: Vec<Vec<char>> = fs::read_to_string(file).unwrap().trim().split("\n").map(|l| l.chars().collect()).collect();
+    let mut grid: Vec<Vec<Plot>> = fs::read_to_string(file).unwrap().trim().split("\n").map(|l| l.chars().map(|c| Plot{plant: c, in_region: false, fences: 0}).collect()).collect();
     let dims = (grid.len(), grid[0].len());
-
-    let mut in_region: Vec<Vec<bool>> = Vec::new(); // already included in a region
-    let mut fences: Vec<Vec<usize>> = Vec::new(); // how many fences on this plot
-
-    for _i in 0..dims.0 {
-        let mut region_row: Vec<bool> = Vec::new();
-        let mut fence_row: Vec<usize> = Vec::new();
-        for _j in 0..dims.1 {
-            region_row.push(false);
-            fence_row.push(0);
-        }
-        in_region.push(region_row);
-        fences.push(fence_row);
-    }
 
     let mut regions: Vec<HashSet<(usize, usize)>> = Vec::new();
     for i in 0..dims.0 {
         for j in 0..dims.1 {
-            regions.push(search(i, j, &grid, &mut in_region, &mut fences));
+            regions.push(search(i, j, &mut grid));
         }
     }
 
@@ -69,7 +61,7 @@ pub fn main(file: &str) {
         let area = r.len();
         let mut perimeter = 0;
         for plot in r {
-            perimeter += fences[plot.0][plot.1];
+            perimeter += grid[plot.0][plot.1].fences;
         }
         cost += area * perimeter;
     }
