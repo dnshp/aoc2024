@@ -25,6 +25,7 @@ fn parse_machine(lines: Vec<&str>) -> Result<Machine, Box<dyn Error>> {
 
     let p = Regex::new(res[2]).unwrap().captures(lines[2]).unwrap();
     let p: (f64, f64) = (p[1].parse()?, p[2].parse()?);
+    let p: (f64, f64) = (p.0 + 10000000000000.0, p.1 + 10000000000000.0);
 
     Ok(Machine{a: a, b: b, p: p})
 }
@@ -59,9 +60,10 @@ pub fn main(file: &str) {
         if (m.a.1 as usize * presses[0]) + (m.b.1 as usize * presses[1]) != m.p.1 as usize {
             continue;
         }
-        if presses[0] <= 100 && presses[1] <= 100 {
-            total += (3 * presses[0]) + presses[1];
-        }
+        //  if presses[0] <= 100 && presses[1] <= 100 {
+        //      total += (3 * presses[0]) + presses[1];
+        //  }
+        total += (3 * presses[0]) + presses[1];
     }
 
     println!("{}", total);
